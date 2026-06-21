@@ -41,8 +41,8 @@ const Navbar = () => {
               whiteSpace: 'nowrap'
             }}
           >
-            <a href="#construction" className="transition-colors duration-300 text-[11px] tracking-widest uppercase" style={{ color: '#f5f7f5', textDecoration: 'none', marginRight: '40px', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Construction</a>
             <a href="#interior" className="transition-colors duration-300 text-[11px] tracking-widest uppercase" style={{ color: '#f5f7f5', textDecoration: 'none', marginRight: '40px', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Interior</a>
+            <a href="#construction" className="transition-colors duration-300 text-[11px] tracking-widest uppercase" style={{ color: '#f5f7f5', textDecoration: 'none', marginRight: '40px', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Construction</a>
             <a href="#products" className="transition-colors duration-300 text-[11px] tracking-widest uppercase" style={{ color: '#f5f7f5', textDecoration: 'none', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Products</a>
           </div>
 
@@ -71,8 +71,6 @@ const HeroSection = () => {
         backgroundColor: '#3d4a41' 
       }}
     >
-      
-      {/* Left Panel: Simple & Sophisticated Ultra-Light Typography */}
       <div 
         style={{ 
           position: 'absolute',
@@ -84,14 +82,13 @@ const HeroSection = () => {
         }}
       >
         <div>
-          {/* Clean, tight-spaced, ultra-simple architectural text structure */}
           <h1 
             style={{ 
               color: '#f5f7f5', 
               fontSize: 'clamp(2.5rem, 5.5vw, 4.8rem)', 
-              fontWeight: '200',        // Delicate line thickness
-              lineHeight: '0.85',       // Tight vertical line spacing
-              letterSpacing: '-0.02em', // Compressed horizontal letter spacing
+              fontWeight: '200',        
+              lineHeight: '0.85',       
+              letterSpacing: '-0.02em', 
               margin: '0 0 24px 0', 
               fontFamily: '"Plus Jakarta Sans", sans-serif', 
               textTransform: 'uppercase'
@@ -121,7 +118,6 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Right Panel: 3D Model Canvas */}
       <div 
         style={{ 
           position: 'absolute',
@@ -155,7 +151,116 @@ const HeroSection = () => {
           }}
         ></model-viewer>
       </div>
+    </section>
+  );
+};
 
+// === PORTFOLIO CHAPTER ROW COMPONENT ===
+const PortfolioRow = ({ id, heading, subheading, paragraph, imgUrl, reverse }) => {
+  return (
+    <section 
+      id={id}
+      style={{
+        width: '100%',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '100px 8%',
+        backgroundColor: '#3d4a41',
+        boxSizing: 'border-box'
+      }}
+    >
+      <div 
+        style={{ 
+          width: '100%',
+          maxWidth: '1440px',
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: reverse ? '1.1fr 0.9fr' : '0.9fr 1.1fr',
+          gap: '8%',
+          alignItems: 'center'
+        }}
+      >
+        {/* Content Box */}
+        <div style={{ order: reverse ? 2 : 1 }}>
+          <span 
+            style={{
+              fontFamily: '"Plus Jakarta Sans", sans-serif',
+              fontSize: '0.75rem',
+              fontWeight: '400',
+              textTransform: 'uppercase',
+              letterSpacing: '0.25em',
+              color: '#b3beb7',
+              display: 'block',
+              marginBottom: '16px'
+            }}
+          >
+            {subheading}
+          </span>
+          <h2 
+            style={{ 
+              color: '#f5f7f5', 
+              fontSize: 'clamp(2rem, 4vw, 3.8rem)', 
+              fontWeight: '200',        
+              lineHeight: '0.85',       
+              letterSpacing: '-0.02em', 
+              margin: '0 0 28px 0', 
+              fontFamily: '"Plus Jakarta Sans", sans-serif', 
+              textTransform: 'uppercase'
+            }}
+          >
+            {heading}
+          </h2>
+          <p 
+            style={{ 
+              color: '#b3beb7', 
+              fontSize: '0.9rem', 
+              lineHeight: '1.8', 
+              maxWidth: '420px',
+              margin: '0',
+              fontWeight: '300',
+              fontFamily: '"Plus Jakarta Sans", sans-serif' 
+            }}
+          >
+            {paragraph}
+          </p>
+        </div>
+
+        {/* Image Display Frame with Blueprint Filter */}
+        <div style={{ order: reverse ? 1 : 2, width: '100%' }}>
+          <div 
+            style={{ 
+              width: '100%',
+              aspectRatio: '4/5',
+              overflow: 'hidden',
+              backgroundColor: '#2b352e', 
+              position: 'relative'
+            }}
+          >
+            <img 
+              src={imgUrl} 
+              alt={heading} 
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                filter: 'grayscale(1) contrast(1.18) brightness(0.82)',
+                mixBlendMode: 'luminosity', 
+                opacity: 0.88
+              }}
+            />
+            <div 
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundColor: 'rgba(61, 74, 65, 0.22)',
+                mixBlendMode: 'color',
+                pointerEvents: 'none'
+              }}
+            />
+          </div>
+        </div>
+      </div>
     </section>
   );
 };
@@ -163,7 +268,6 @@ const HeroSection = () => {
 // === MAIN LANDING PAGE COMPONENT ===
 const LandingPage = () => {
   useEffect(() => {
-    // Inject Plus Jakarta Sans Font Family
     const fontId = 'studio-minimal-fonts';
     if (!document.getElementById(fontId)) {
       const link = document.createElement('link');
@@ -173,7 +277,6 @@ const LandingPage = () => {
       document.head.appendChild(link);
     }
 
-    // Inject 3D Model Viewer Engine Script
     const scriptId = 'model-viewer-script';
     if (!document.getElementById(scriptId)) {
       const script = document.createElement('script');
@@ -187,10 +290,40 @@ const LandingPage = () => {
   return (
     <div 
       className="w-full min-h-screen antialiased"
-      style={{ backgroundColor: '#3d4a41' }}
+      style={{ backgroundColor: '#3d4a41', overflowX: 'hidden' }}
     >
       <Navbar />
       <HeroSection />
+      
+      {/* Chapter 1: Interior -> Using local asset paths */}
+      <PortfolioRow 
+        id="interior"
+        subheading="Chapter 01"
+        heading="Interior"
+        paragraph="Crafting internal spaces where physical form aligns completely with environmental flow. Every ceiling plane, embedded element, and hidden interface serves an intentional purpose."
+        imgUrl="assets/1.jpg"
+        reverse={false}
+      />
+
+      {/* Chapter 2: Construction -> Using local asset paths */}
+      <PortfolioRow 
+        id="construction"
+        subheading="Chapter 02"
+        heading="Construction"
+        paragraph="Executing physical frameworks with mechanical precision. We translate raw structural calculations into clean architectural truths, balancing structural density with open voids."
+        imgUrl="assets/2.jpg"
+        reverse={true}
+      />
+
+      {/* Chapter 3: Products -> Using local asset paths */}
+      <PortfolioRow 
+        id="products"
+        subheading="Chapter 03"
+        heading="Products"
+        paragraph="Developing bespoke interior components, hardware accessories, and micro-architectural elements. Each item is stripped down to its functional requirements and built to last."
+        imgUrl="assets/3.jpg"
+        reverse={false}
+      />
     </div>
   );
 };
