@@ -1,17 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 // === NAVBAR COMPONENT ===
 const Navbar = () => {
   return (
-    <div style={{ padding: '32px 12px 0 12px', backgroundColor: 'transparent' }}>
+    <div style={{ padding: '32px 12px 0 12px', backgroundColor: 'transparent', position: 'relative', zIndex: 100 }}>
       <nav 
-        className="max-w-7xl mx-auto sticky top-6 z-50"
-        style={{ 
-          position: 'relative', 
-          backgroundColor: 'transparent', 
-          borderBottom: 'none', 
-          padding: '0 24px'
-        }}
+        className="max-w-7xl mx-auto"
+        style={{ backgroundColor: 'transparent', padding: '0 24px' }}
       >
         <div className="h-16 flex items-center justify-between gap-4">
           
@@ -29,7 +24,7 @@ const Navbar = () => {
             </span>
           </div>
 
-          {/* Middle: Navigation Links - Perfectly Centered */}
+          {/* Middle: Navigation Links */}
           <div 
             style={{ 
               position: 'absolute',
@@ -46,7 +41,7 @@ const Navbar = () => {
             <a href="#products" className="transition-colors duration-300 text-[11px] tracking-widest uppercase" style={{ color: '#f5f7f5', textDecoration: 'none', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Products</a>
           </div>
 
-          {/* Right: Get Started Text Link */}
+          {/* Right: Get Started Link */}
           <div className="flex-shrink-0">
             <a href="#get-started" className="text-[11px] font-medium tracking-widest uppercase transition-colors duration-300 whitespace-nowrap" style={{ color: '#f5f7f5', textDecoration: 'none', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Get Started</a>
           </div>
@@ -57,28 +52,126 @@ const Navbar = () => {
   );
 };
 
-// === HERO SECTION COMPONENT ===
-const HeroSection = () => {
+// === MAIN LANDING PAGE COMPONENT ===
+const LandingPage = () => {
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [isModelHovered, setIsModelHovered] = useState(false);
+  
+  const pointerStartCoords = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const fontId = 'studio-minimal-fonts';
+    if (!document.getElementById(fontId)) {
+      const link = document.createElement('link');
+      link.id = fontId;
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700&display=swap';
+      document.head.appendChild(link);
+    }
+
+    const scriptId = 'model-viewer-script';
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.type = 'module';
+      script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js';
+      document.head.appendChild(script);
+    }
+
+    const styleId = 'studio-absolute-lockout';
+    if (!document.getElementById(styleId)) {
+      const styleSheet = document.createElement('style');
+      styleSheet.id = styleId;
+      styleSheet.innerText = `
+        html, body {
+          overflow: hidden !important;
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+        }
+        .studio-card {
+          border: 1px solid transparent;
+          border-radius: 6px;
+        }
+        /* POP SCALE ONLY - BORDER OUTLINES AND BACKDROP TINTS REMOVED */
+        .studio-card:hover {
+          transform: translateY(0) scale(1.05) !important;
+        }
+      `;
+      document.head.appendChild(styleSheet);
+    }
+  }, []);
+
+  const handlePointerDown = (e) => {
+    pointerStartCoords.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handlePointerUp = (e) => {
+    const deltaX = Math.abs(e.clientX - pointerStartCoords.current.x);
+    const deltaY = Math.abs(e.clientY - pointerStartCoords.current.y);
+
+    if (deltaX > 6 || deltaY > 6) return;
+
+    setIsZoomed(!isZoomed);
+  };
+
+  // Fixed choreography: Incoming blocks delay slightly so outgoing blocks can vanish cleanly first
+  const generateLinkBlockStyle = (isActive) => ({
+    position: 'absolute',
+    width: '360px',
+    display: 'flex',
+    flexDirection: 'column',
+    textDecoration: 'none',
+    fontFamily: '"Plus Jakarta Sans", sans-serif',
+    padding: '24px',
+    opacity: isActive ? 1 : 0,
+    transform: isActive ? 'translateY(0)' : 'translateY(20px)',
+    pointerEvents: isActive ? 'auto' : 'none',
+    cursor: 'pointer',
+    zIndex: 20,
+    transition: isActive 
+      ? 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s' 
+      : 'opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0s, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0s'
+  });
+
+  const getModelTransformValue = () => {
+    let baseScale = isZoomed ? 1.25 : 1.0;
+    if (isModelHovered) {
+      baseScale += 0.05;
+    }
+    return `translate(-50%, -50%) scale(${baseScale})`;
+  };
+
   return (
-    <section 
+    <div 
+      className="w-full h-screen antialiased"
       style={{ 
-        position: 'relative', 
-        width: '100%', 
-        minHeight: 'calc(100vh - 80px)', 
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        backgroundColor: '#3d4a41' 
+        backgroundColor: '#3d4a41',
+        position: 'relative',
+        overflow: 'hidden'
       }}
     >
+      <Navbar />
+
+      {/* STAGE 1: DEFAULT HERO VIEW VIEWPORT LAYOUT */}
       <div 
         style={{ 
           position: 'absolute',
-          inset: '0 52% 0 0', 
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100vh',
           display: 'flex',
           alignItems: 'center',
           padding: '0 5% 0 8%',
-          zIndex: 10
+          zIndex: 10,
+          pointerEvents: 'none',
+          opacity: isZoomed ? 0 : 1,
+          transform: isZoomed ? 'translateY(-30px)' : 'translateY(0)',
+          transition: isZoomed 
+            ? 'opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0s, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0s' 
+            : 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s'
         }}
       >
         <div>
@@ -118,14 +211,81 @@ const HeroSection = () => {
         </div>
       </div>
 
+      {/* STAGE 2: INTERACTIVE NAV-LINK BLOCKS */}
+      {/* Link 1: Interior Focus */}
+      <a 
+        href="#interior-explore" 
+        className="studio-card"
+        style={{
+          ...generateLinkBlockStyle(isZoomed),
+          left: '5vw',
+          top: '41vh'
+        }}
+      >
+        <span style={{ color: '#f5f7f5', fontSize: '28px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
+          Interior
+        </span>
+        <span style={{ color: '#b3beb7', fontSize: '13px', fontWeight: '300', lineHeight: '1.6', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          Spatial system design and structural exposures. We curate spatial layouts that intentionally integrate custom mechanical components right into the architecture.
+        </span>
+      </a>
+
+      {/* Link 2: Construction Focus */}
+      <a 
+        href="#construction-explore" 
+        className="studio-card"
+        style={{
+          ...generateLinkBlockStyle(isZoomed),
+          right: '5vw',
+          top: '16vh'
+        }}
+      >
+        <span style={{ color: '#f5f7f5', fontSize: '28px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
+          Construction
+        </span>
+        <span style={{ color: '#b3beb7', fontSize: '13px', fontWeight: '300', lineHeight: '1.6', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          Structural framework engineering and fabrication execution. Our onsite technical direction bridges complex calculations with pristine structural physical realities.
+        </span>
+      </a>
+
+      {/* Link 3: Products Focus */}
+      <a 
+        href="#products-explore" 
+        className="studio-card"
+        style={{
+          ...generateLinkBlockStyle(isZoomed),
+          right: '5vw',
+          top: '62vh'
+        }}
+      >
+        <span style={{ color: '#f5f7f5', fontSize: '28px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
+          Products
+        </span>
+        <span style={{ color: '#b3beb7', fontSize: '13px', fontWeight: '300', lineHeight: '1.6', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          Custom high-spec hardware components manufactured directly to order. Tailored mechanisms engineered to satisfy rigorous performance thresholds.
+        </span>
+      </a>
+
+      {/* FIXED VIEWPORT INTERACTIVE 3D MODEL CANVAS MODULE */}
       <div 
+        onMouseDown={handlePointerDown}
+        onMouseUp={handlePointerUp}
+        onMouseEnter={() => setIsModelHovered(true)}
+        onMouseLeave={() => setIsModelHovered(false)}
         style={{ 
-          position: 'absolute',
-          inset: '0px 0px 0px 48%', 
+          position: 'absolute', 
+          top: '50%',
+          left: isZoomed ? '50%' : '74%', 
+          transform: getModelTransformValue(),
+          width: '50vw', 
+          height: '80vh',
           zIndex: 5,
+          cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          filter: isModelHovered ? 'drop-shadow(0 20px 40px rgba(0,0,0,0.2))' : 'drop-shadow(0 0px 0px rgba(0,0,0,0))',
+          transition: 'left 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s ease'
         }}
       >
         <model-viewer 
@@ -151,179 +311,6 @@ const HeroSection = () => {
           }}
         ></model-viewer>
       </div>
-    </section>
-  );
-};
-
-// === PORTFOLIO CHAPTER ROW COMPONENT ===
-const PortfolioRow = ({ id, heading, subheading, paragraph, imgUrl, reverse }) => {
-  return (
-    <section 
-      id={id}
-      style={{
-        width: '100%',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        padding: '100px 8%',
-        backgroundColor: '#3d4a41',
-        boxSizing: 'border-box'
-      }}
-    >
-      <div 
-        style={{ 
-          width: '100%',
-          maxWidth: '1440px',
-          margin: '0 auto',
-          display: 'grid',
-          gridTemplateColumns: reverse ? '1.1fr 0.9fr' : '0.9fr 1.1fr',
-          gap: '8%',
-          alignItems: 'center'
-        }}
-      >
-        {/* Content Box */}
-        <div style={{ order: reverse ? 2 : 1 }}>
-          <span 
-            style={{
-              fontFamily: '"Plus Jakarta Sans", sans-serif',
-              fontSize: '0.75rem',
-              fontWeight: '400',
-              textTransform: 'uppercase',
-              letterSpacing: '0.25em',
-              color: '#b3beb7',
-              display: 'block',
-              marginBottom: '16px'
-            }}
-          >
-            {subheading}
-          </span>
-          <h2 
-            style={{ 
-              color: '#f5f7f5', 
-              fontSize: 'clamp(2rem, 4vw, 3.8rem)', 
-              fontWeight: '200',        
-              lineHeight: '0.85',       
-              letterSpacing: '-0.02em', 
-              margin: '0 0 28px 0', 
-              fontFamily: '"Plus Jakarta Sans", sans-serif', 
-              textTransform: 'uppercase'
-            }}
-          >
-            {heading}
-          </h2>
-          <p 
-            style={{ 
-              color: '#b3beb7', 
-              fontSize: '0.9rem', 
-              lineHeight: '1.8', 
-              maxWidth: '420px',
-              margin: '0',
-              fontWeight: '300',
-              fontFamily: '"Plus Jakarta Sans", sans-serif' 
-            }}
-          >
-            {paragraph}
-          </p>
-        </div>
-
-        {/* Image Display Frame with Blueprint Filter */}
-        <div style={{ order: reverse ? 1 : 2, width: '100%' }}>
-          <div 
-            style={{ 
-              width: '100%',
-              aspectRatio: '4/5',
-              overflow: 'hidden',
-              backgroundColor: '#2b352e', 
-              position: 'relative'
-            }}
-          >
-            <img 
-              src={imgUrl} 
-              alt={heading} 
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                filter: 'grayscale(1) contrast(1.18) brightness(0.82)',
-                mixBlendMode: 'luminosity', 
-                opacity: 0.88
-              }}
-            />
-            <div 
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundColor: 'rgba(61, 74, 65, 0.22)',
-                mixBlendMode: 'color',
-                pointerEvents: 'none'
-              }}
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// === MAIN LANDING PAGE COMPONENT ===
-const LandingPage = () => {
-  useEffect(() => {
-    const fontId = 'studio-minimal-fonts';
-    if (!document.getElementById(fontId)) {
-      const link = document.createElement('link');
-      link.id = fontId;
-      link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500&display=swap';
-      document.head.appendChild(link);
-    }
-
-    const scriptId = 'model-viewer-script';
-    if (!document.getElementById(scriptId)) {
-      const script = document.createElement('script');
-      script.id = scriptId;
-      script.type = 'module';
-      script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js';
-      document.head.appendChild(script);
-    }
-  }, []);
-
-  return (
-    <div 
-      className="w-full min-h-screen antialiased"
-      style={{ backgroundColor: '#3d4a41', overflowX: 'hidden' }}
-    >
-      <Navbar />
-      <HeroSection />
-      
-      {/* Chapter 1: Interior -> Using local asset paths */}
-      <PortfolioRow 
-        id="interior"
-        subheading="Chapter 01"
-        heading="Interior"
-        paragraph="Crafting internal spaces where physical form aligns completely with environmental flow. Every ceiling plane, embedded element, and hidden interface serves an intentional purpose."
-        imgUrl="assets/1.jpg"
-        reverse={false}
-      />
-
-      {/* Chapter 2: Construction -> Using local asset paths */}
-      <PortfolioRow 
-        id="construction"
-        subheading="Chapter 02"
-        heading="Construction"
-        paragraph="Executing physical frameworks with mechanical precision. We translate raw structural calculations into clean architectural truths, balancing structural density with open voids."
-        imgUrl="assets/2.jpg"
-        reverse={true}
-      />
-
-      {/* Chapter 3: Products -> Using local asset paths */}
-      <PortfolioRow 
-        id="products"
-        subheading="Chapter 03"
-        heading="Products"
-        paragraph="Developing bespoke interior components, hardware accessories, and micro-architectural elements. Each item is stripped down to its functional requirements and built to last."
-        imgUrl="assets/3.jpg"
-        reverse={false}
-      />
     </div>
   );
 };
